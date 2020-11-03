@@ -9,7 +9,7 @@ using namespace std;
 
 int priority(char a)
 {
-    int temp;
+    int temp = -1; //Init
     if (a == '^')
         temp = 1;
     else if (a == '*' || a == '/')
@@ -18,7 +18,8 @@ int priority(char a)
         temp = 3;
     return temp;
 }
-long eval(char operation, int operand1, int operand2)
+
+float eval(char operation, float operand1, float operand2)
 {
     if (operation == '+')
         return operand1 + operand2;
@@ -31,12 +32,12 @@ long eval(char operation, int operand1, int operand2)
     else if (operation == '^')
         return pow(operand1, operand2);
     else
-        cout << "Unexpected Error \n";
+        cout << "Unexpected Error\n";
     return -1;
 }
-bool IsOperator(char C)
+bool IsOperator(char c)
 {
-    if (C == '+' || C == '-' || C == '*' || C == '/' || C == '^')
+    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^')
         return true;
     return false;
 }
@@ -71,6 +72,7 @@ int EvaluatePostfix(string expression)
     }
     return S.top();
 }
+
 string in_to_post(string infix)
 {
     stack<char> operator_stack;
@@ -115,6 +117,7 @@ string in_to_post(string infix)
 
     return output.str();
 }
+
 void processArgs(int argc, char **argv)
 {
     string inputPath = string(argv[1]);
@@ -126,19 +129,15 @@ void processArgs(int argc, char **argv)
     string line;
     fi.open("input.txt");
     fo.open("output.txt");
-    while (fi >>line)
+    while (n--)
     {
-        getline(fi, line, '\n');
-        // if (action == "-t")
-        //     fo << in_to_post(line) << endl;
-        // if (action == "-c")
-        //     fo << EvaluatePostfix(in_to_post(line)) << endl;
-        // i++;
+        getline(fi, line);
         cout << line << endl;
     }
     fi.close();
     fo.close();
 }
+
 int main(int argc, char **argv)
 {
     processArgs(argc, argv);
