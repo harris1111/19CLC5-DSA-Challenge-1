@@ -90,13 +90,13 @@ string in_to_post(string infix)
             }
             operator_stack.push(infix[i]);
         }
-        else if ((infix[i] == '(') && (infix[i] == '[') && (infix[i] == '{'))
+        else if (infix[i] == '(')
         {
             operator_stack.push(infix[i]);
         }
-        else if ((infix[i] == ')') && (infix[i] == ']') && (infix[i] == '}'))
+        else if (infix[i] == ')')
         {
-            while ((operator_stack.top() != '(') && (operator_stack.top() != '[') && (operator_stack.top() != '{'))
+            while (operator_stack.top() != '(')
             {
                 output << operator_stack.top();
                 operator_stack.pop();
@@ -132,7 +132,10 @@ void processArgs(int argc, char **argv)
     while (n--)
     {
         getline(fi, line);
-        cout << line << endl;
+        if (action == "-t")
+            cout << in_to_post(line) << endl;
+        else if (action == "-c")
+            cout << EvaluatePostfix(in_to_post(line)) << endl;
     }
     fi.close();
     fo.close();
