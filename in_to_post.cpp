@@ -9,71 +9,94 @@ using namespace std;
 
 int priority(char a)
 {
-    int temp = -1;
-    if (a == '^')
-        temp = 1;
-    else if (a == '*' || a == '/')
-        temp = 2;
-    else if (a == '+' || a == '-')
-        temp = 3;
-    return temp;
+    if (a == '^') return 1;
+    if (a == '*' || a == '/') return 2;
+    if (a == '+' || a == '-') return 3;
+    return 4;    
 }
 
 float eval(char operation, float operand1, float operand2)
 {
-    if (operation == '+')
-        return operand1 + operand2;
-    else if (operation == '-')
-        return operand1 - operand2;
-    else if (operation == '*')
-        return operand1 * operand2;
-    else if (operation == '/')
-        return operand1 / operand2;
-    else if (operation == '^')
-        return pow(operand1, operand2);
-    else
-        cout << "Unexpected Error\n";
+    if (operation == '+') return operand1 + operand2;
+    if (operation == '-') return operand1 - operand2;
+    if (operation == '*') return operand1 * operand2;
+    if (operation == '/') return operand1 / operand2;
+    if (operation == '^') return pow(operand1, operand2);
+    cout << "Unexpected Error\n";
     return -1;
 }
+
+bool IsOpenBracket(char ch)
+{
+    return (ch=='(' || ch=='[' || ch=='{');
+}
+
+bool IsCloseBracket(char ch)
+{
+    return (ch==')' || ch==']' || ch=='}');
+}
+
+char GetBracket(char c)
+{
+    switch (c) 
+    {
+        case('('): return ')';
+        case(')'): return '(';
+        case('['): return ']';
+        case(']'): return '[';
+        case('{'): return '}';
+        case('}'): return '{';
+    } 
+    return '?'; 
+}
+
 bool IsOperator(char c)
 {
-    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^')
-        return true;
-    return false;
+    return (c == '+' || c == '-' || c == '*' || c == '/' || c == '^');
 }
-int EvaluatePostfix(string expression)
+
+float EvaluatePostfix(string expression)
 {
-    stack<int> S;
-    for (unsigned int i = 0; i < expression.length(); i++)
+    stack<float> stk;
+    for (int i = 0; i < expression.length(); i++)
     {
         if (expression[i] == ' ' || expression[i] == ',')
             continue;
-
         else if (IsOperator(expression[i]))
         {
-            int operand2 = S.top();
-            S.pop();
-            int operand1 = S.top();
-            S.pop();
-            int result = eval(expression[i], operand1, operand2);
-            S.push(result);
+            float operand2 = stk.top();
+            stk.pop();
+            float operand1 = stk.top();
+            stk.pop();
+            float result = eval(expression[i], operand1, operand2);
+            stk.push(result);
         }
-        else if (isdigit(expression[i]))
+        else
         {
-            int operand = 0;
-            while (i < expression.length() && isdigit(expression[i]))
+            float operand = 0;
+            while (i < expression.length() && expression[i]!=' ' && expression[i]!='.')
             {
                 operand = (operand * 10) + (expression[i] - '0');
                 i++;
             }
-            i--;
-            S.push(operand);
+            if (expression[i]=='.') 
+            {
+                i++;
+                float p = 0.1;
+                while (i < expression.length() && expression[i]!=' ')
+                {
+                    operand += p*(expression[i]-'0');
+                    p/=10;
+                    i++;
+                }
+            }
+            stk.push(operand);
         }
     }
-    return S.top();
+    return stk.top();
 }
 
-string in_to_post(string infix)
+string InfixToPostfix(string infix)
 {
     stack<char> operator_stack;
     stringstream output;
@@ -84,26 +107,27 @@ string in_to_post(string infix)
         char ch = infix[i];
         if (ch!=' ')
         {
-            if (isNumber && (IsOperator(ch) || ch=='(' || ch==')')) {
+            if (isNumber && (IsOperator(ch) || GetBracket(ch)!='?')) {
                 output << " ";
                 isNumber = false;
             }
             if (IsOperator(ch))
             {
-                while (!operator_stack.empty() && priority(operator_stack.top()) >= priority(ch))
+                while (!operator_stack.empty() && priority(operator_stack.top()) <= priority(ch))
                 {
                     output << operator_stack.top() << " ";
                     operator_stack.pop();
                 }
                 operator_stack.push(infix[i]);
             }
-            else if (ch == '(')
+            else if (IsOpenBracket(ch))
             {
                 operator_stack.push(ch);
             }
-            else if (ch == ')')
+            else if (IsCloseBracket(ch))
             {
-                while (operator_stack.top() != '(')
+                char openBracket = GetBracket(ch);
+                while (operator_stack.top() != openBracket)
                 {
                     output << operator_stack.top() << " ";
                     operator_stack.pop();
@@ -134,19 +158,22 @@ void processArgs(int argc, char **argv)
     int n = atoi(argv[2]);
     string action = string(argv[3]);
     string outputPath = string(argv[4]);
+    
     ofstream fo;
     ifstream fi;
     string line;
     fi.open("input.txt");
     fo.open("output.txt");
+
     while (n--)
     {
         getline(fi, line);
         if (action == "-t")
-            cout << in_to_post(line) << endl;
-        else if (action == "-c")
-            cout << EvaluatePostfix(in_to_post(line)) << endl;
+            cout << InfixToPostfix(line) << endl;
+        else
+            cout << EvaluatePostfix(InfixToPostfix(line)) << endl;
     }
+
     fi.close();
     fo.close();
 }
@@ -154,6 +181,5 @@ void processArgs(int argc, char **argv)
 int main(int argc, char **argv)
 {
     processArgs(argc, argv);
-    system("pause");
     return 0;
 }
