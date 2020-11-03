@@ -1,9 +1,10 @@
 #include <iostream>
 #include <sstream>
 #include <stack>
-#include <limits>
 #include <string>
+#include <string.h>
 #include <cmath>
+#include <fstream>
 using namespace std;
 
 int priority(char a)
@@ -42,7 +43,7 @@ bool IsOperator(char C)
 int EvaluatePostfix(string expression)
 {
     stack<int> S;
-    for (int i = 0; i < expression.length(); i++)
+    for (unsigned int i = 0; i < expression.length(); i++)
     {
         if (expression[i] == ' ' || expression[i] == ',')
             continue;
@@ -70,11 +71,8 @@ int EvaluatePostfix(string expression)
     }
     return S.top();
 }
-int main()
+string in_to_post(string infix)
 {
-    string infix;
-    getline(cin, infix);
-
     stack<char> operator_stack;
 
     stringstream output;
@@ -90,13 +88,13 @@ int main()
             }
             operator_stack.push(infix[i]);
         }
-        else if (infix[i] == '(')
+        else if ((infix[i] == '(') && (infix[i] == '[') && (infix[i] == '{'))
         {
             operator_stack.push(infix[i]);
         }
-        else if (infix[i] == ')')
+        else if ((infix[i] == ')') && (infix[i] == ']') && (infix[i] == '}'))
         {
-            while (operator_stack.top() != '(')
+            while ((operator_stack.top() != '(') && (operator_stack.top() != '[') && (operator_stack.top() != '{'))
             {
                 output << operator_stack.top();
                 operator_stack.pop();
@@ -115,9 +113,35 @@ int main()
         operator_stack.pop();
     }
 
-    cout << output.str() << endl;
-    cout << EvaluatePostfix(output.str()) << endl;
+    return output.str();
+}
+void processArgs(int argc, char **argv)
+{
+    string inputPath = string(argv[1]);
+    int n = atoi(argv[2]);
+    string action = string(argv[3]);
+    string outputPath = string(argv[4]);
+    ofstream fo;
+    ifstream fi;
+    string line;
+    fi.open("input.txt");
+    fo.open("output.txt");
+    while (fi >>line)
+    {
+        getline(fi, line, '\n');
+        // if (action == "-t")
+        //     fo << in_to_post(line) << endl;
+        // if (action == "-c")
+        //     fo << EvaluatePostfix(in_to_post(line)) << endl;
+        // i++;
+        cout << line << endl;
+    }
+    fi.close();
+    fo.close();
+}
+int main(int argc, char **argv)
+{
+    processArgs(argc, argv);
     system("pause");
-
     return 0;
 }
