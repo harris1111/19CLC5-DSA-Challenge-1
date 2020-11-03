@@ -9,7 +9,7 @@ using namespace std;
 
 int priority(char a)
 {
-    int temp = -1; //Init
+    int temp = -1;
     if (a == '^')
         temp = 1;
     else if (a == '*' || a == '/')
@@ -76,42 +76,52 @@ int EvaluatePostfix(string expression)
 string in_to_post(string infix)
 {
     stack<char> operator_stack;
-
     stringstream output;
+    bool isNumber = false;
 
     for (unsigned i = 0; i < infix.length(); i++)
     {
-        if (infix[i] == '+' || infix[i] == '-' || infix[i] == '*' || infix[i] == '/' || infix[i] == '^')
+        char ch = infix[i];
+        if (ch!=' ')
         {
-            while (!operator_stack.empty() && priority(operator_stack.top()) <= priority(infix[i]))
+            if (isNumber && (IsOperator(ch) || ch=='(' || ch==')')) {
+                output << " ";
+                isNumber = false;
+            }
+            if (IsOperator(ch))
             {
-                output << operator_stack.top();
+                while (!operator_stack.empty() && priority(operator_stack.top()) >= priority(ch))
+                {
+                    output << operator_stack.top() << " ";
+                    operator_stack.pop();
+                }
+                operator_stack.push(infix[i]);
+            }
+            else if (ch == '(')
+            {
+                operator_stack.push(ch);
+            }
+            else if (ch == ')')
+            {
+                while (operator_stack.top() != '(')
+                {
+                    output << operator_stack.top() << " ";
+                    operator_stack.pop();
+                }
                 operator_stack.pop();
             }
-            operator_stack.push(infix[i]);
-        }
-        else if (infix[i] == '(')
-        {
-            operator_stack.push(infix[i]);
-        }
-        else if (infix[i] == ')')
-        {
-            while (operator_stack.top() != '(')
-            {
-                output << operator_stack.top();
-                operator_stack.pop();
+            else
+            {   
+                output << infix[i];
+                isNumber = true;
             }
-            operator_stack.pop();
-        }
-        else
-        {
-            output << infix[i];
         }
     }
 
+    if (isNumber) output << " ";
     while (!operator_stack.empty())
     {
-        output << operator_stack.top();
+        output << operator_stack.top() << " ";
         operator_stack.pop();
     }
 
