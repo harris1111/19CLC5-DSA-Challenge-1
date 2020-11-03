@@ -165,7 +165,7 @@ bool valid(string line)
         } 
         else if (IsCloseBracket(ch))
         {
-            if (stk.top()!=GetBracket(ch)) return false;
+            if (stk.empty() || stk.top()!=GetBracket(ch)) return false;
             stk.pop();
         }
         else if (IsOperator(ch)) 
@@ -175,9 +175,11 @@ bool valid(string line)
         else if (ch!=' ')
         {
             if (number) return false;
-            while (i<line.length() && ((line[i]<='9' && line[i]>='0') || line[i]=='.')){
+            while (i<line.length() && ((line[i]<='9' && line[i]>='0') || line[i]=='.'))
+            {
                 i++;
             }
+            i--;
             number = true;
         }
     }
