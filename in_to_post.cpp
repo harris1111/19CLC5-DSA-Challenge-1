@@ -152,6 +152,38 @@ string InfixToPostfix(string infix)
     return output.str();
 }
 
+bool valid(string line)
+{
+    stack<char> stk;
+    bool number = false;
+    for (int i=0;i<line.length();i++)
+    {
+        char ch = line[i];
+        if (IsOpenBracket(ch))
+        {
+            stk.push(ch);
+        } 
+        else if (IsCloseBracket(ch))
+        {
+            if (stk.top()!=GetBracket(ch)) return false;
+            stk.pop();
+        }
+        else if (IsOperator(ch)) 
+        {
+            number = false;
+        } 
+        else if (ch!=' ')
+        {
+            if (number) return false;
+            while (i<line.length() && ((line[i]<='9' && line[i]>='0') || line[i]=='.')){
+                i++;
+            }
+            number = true;
+        }
+    }
+    return true;
+}
+
 void processArgs(int argc, char **argv)
 {
     string inputPath = string(argv[1]);
@@ -168,6 +200,10 @@ void processArgs(int argc, char **argv)
     while (n--)
     {
         getline(fi, line);
+        if (!valid(line)) {
+            cout << "E\n";
+            continue;
+        }
         if (action == "-t")
             cout << InfixToPostfix(line) << endl;
         else
